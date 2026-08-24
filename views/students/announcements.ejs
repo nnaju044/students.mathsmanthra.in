@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../partials/head') %></head>
+<body class="bg-slate-50 text-slate-800" style="min-height:100svh">
+
+<%
+  const announcementsSafe = typeof announcements !== 'undefined' && Array.isArray(announcements) ? announcements : [];
+%>
+
+<%- include('../partials/student-nav', { student, activePage: 'Announcements' }) %>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5 pb-safe lg:pb-8">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-extrabold text-slate-900">Announcements</h1>
+    <p class="text-sm text-slate-500 mt-0.5"><%= announcementsSafe.length %> announcement<%= announcementsSafe.length === 1 ? '' : 's' %> for you</p>
+  </div>
+
+  <% if (announcementsSafe.length > 0) { %>
+    <div class="space-y-4">
+      <% announcementsSafe.forEach(ann => {
+        const createdAt = ann?.createdAt ? new Date(ann.createdAt) : new Date();
+        const isRecent = (Date.now() - createdAt.getTime()) < 3 * 24 * 60 * 60 * 1000;
+        const targetBadge = {
+          all: { label: 'Everyone', cls: 'bg-slate-100 text-slate-600' },
+          course: { label: 'Your Course', cls: 'bg-blue-100 text-blue-700' },
+          batch: { label: 'Your Batch', cls: 'bg-purple-100 text-purple-700' },
+          student: { label: 'Personal', cls: 'bg-amber-100 text-amber-700' },
+        };
+        const audience = ann?.targetAudience || ann?.targetType || 'all';
+        const badge = targetBadge[audience] || targetBadge.all;
+        const safeTitle = ann?.title || 'Announcement';
+        const safeContent = ann?.content || '';
+        const safeDate = ann?.createdAt ? new Date(ann.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : '—';
+      %>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="h-1 <%= audience === 'student' ? 'bg-amber-400' : audience === 'batch' ? 'bg-purple-400' : audience === 'course' ? 'bg-blue-400' : 'bg-brand-navy' %>"></div>
+          <div class="p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 class="font-bold text-slate-900 text-lg"><%= safeTitle %></h2>
+                <% if (isRecent) { %>
+                  <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600">New</span>
+                <% } %>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold <%= badge.cls %>"><%= badge.label %></span>
+              </div>
+              <time class="text-xs text-slate-400 shrink-0">
+                <%= safeDate %>
+              </time>
+            </div>
+            <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line"><%= safeContent %></p>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-20 text-center">
+      <svg class="w-12 h-12 mx-auto text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 10v4a1 1 0 001 1h2l5 4V5L7 9H5a1 1 0 00-1 1zm12-1a3 3 0 010 6"/></svg>
+      <p class="text-slate-500 font-medium">No announcements yet.</p>
+      <p class="text-slate-400 text-sm mt-1">Announcements from your teacher will appear here.</p>
+    </div>
+  <% } %>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+<%
+  const announcementsSafe = typeof announcements !== 'undefined' && Array.isArray(announcements) ? announcements : [];
+  const searchSafe = typeof search !== 'undefined' ? search : '';
+  const totalCountSafe = typeof totalCount !== 'undefined' ? totalCount : announcementsSafe.length;
+  const currentPageSafe = typeof currentPage !== 'undefined' ? currentPage : 1;
+  const totalPagesSafe = typeof totalPages !== 'undefined' ? totalPages : 1;
+%>
+
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Announcements' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Announcements', pageSubtitle: totalCountSafe + ' total announcements' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <form method="GET" action="/admin/announcements" class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full sm:w-72">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="search" value="<%= searchSafe %>" placeholder="Search announcements..." class="bg-transparent text-sm placeholder-slate-400 focus:outline-none w-full" />
+          </div>
+          <button type="submit" class="px-4 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition">Search</button>
+        </form>
+        <a href="/admin/announcements/new" class="flex items-center gap-2 px-5 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          New Announcement
+        </a>
+      </div>
+
+      <div class="space-y-4">
+        <% if (announcementsSafe.length === 0) { %>
+          <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 9a3 3 0 0 1 0 6"/></svg>
+            <p class="text-slate-500 mb-4">No announcements yet. Create your first announcement for students.</p>
+            <a href="/admin/announcements/new" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition">
+              Create Announcement
+            </a>
+          </div>
+        <% } %>
+        <% announcementsSafe.forEach(a => {
+          const rawAudience = a?.targetAudience || a?.targetType || 'all';
+          const safeAudience = (typeof rawAudience === 'string' && rawAudience.trim().length > 0)
+            ? (rawAudience.trim().toLowerCase() === 'all' ? 'All' : rawAudience.trim().charAt(0).toUpperCase() + rawAudience.trim().slice(1).toLowerCase())
+            : 'All';
+
+          const rawStatus = a?.status || 'draft';
+          const safeStatus = (typeof rawStatus === 'string' && rawStatus.trim().length > 0)
+            ? (rawStatus.trim().toLowerCase() === 'published' ? 'published' : 'draft')
+            : 'draft';
+
+          const displayStatus = safeStatus.charAt(0).toUpperCase() + safeStatus.slice(1);
+          const safeTitle = a?.title || 'Untitled Announcement';
+          const safeContent = a?.content || '';
+          const safeDate = a?.createdAt ? new Date(a.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+          const annStatusColors = { published: 'bg-emerald-50 text-emerald-700 border-emerald-200', draft: 'bg-amber-50 text-amber-700 border-amber-200' };
+        %>
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hover:shadow-md transition">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2 flex-wrap">
+                  <h3 class="font-bold text-slate-900"><%= safeTitle %></h3>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-semibold border <%= annStatusColors[safeStatus] || annStatusColors.draft %>"><%= displayStatus %></span>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                    <%= safeAudience %>
+                  </span>
+                </div>
+                <p class="text-sm text-slate-600 line-clamp-2"><%= safeContent %></p>
+                <p class="text-xs text-slate-400 mt-2"><%= safeDate %></p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <a href="/admin/announcements/<%= a._id %>/edit" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition" title="Edit">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </a>
+                <form method="POST" action="/admin/announcements/<%= a._id %>/delete" onsubmit="return confirm('Delete this announcement?');" class="inline">
+                  <button type="submit" class="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition" title="Delete">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <%- include('../../partials/pagination', { currentPage: currentPageSafe, totalPages: totalPagesSafe, baseUrl: '/admin/announcements?' + (searchSafe ? 'search=' + searchSafe + '&' : '') }) %>
+
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+</body>
+</html>

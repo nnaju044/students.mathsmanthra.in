@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Payments' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Payments', pageSubtitle: totalCount + ' total records' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <form method="GET" action="/admin/payments" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full sm:w-56">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="search" value="<%= search %>" placeholder="Search by student..." class="bg-transparent text-sm placeholder-slate-400 focus:outline-none w-full" />
+          </div>
+          <select name="status" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none">
+            <option value="">All Status</option>
+            <option value="completed" <%= statusFilter === 'completed' ? 'selected' : '' %>>Completed</option>
+            <option value="pending" <%= statusFilter === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="failed" <%= statusFilter === 'failed' ? 'selected' : '' %>>Failed</option>
+          </select>
+          <select name="method" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none">
+            <option value="">All Methods</option>
+            <option value="cash" <%= methodFilter === 'cash' ? 'selected' : '' %>>Cash</option>
+            <option value="upi" <%= methodFilter === 'upi' ? 'selected' : '' %>>UPI</option>
+            <option value="bank_transfer" <%= methodFilter === 'bank_transfer' ? 'selected' : '' %>>Bank Transfer</option>
+            <option value="card" <%= methodFilter === 'card' ? 'selected' : '' %>>Card</option>
+          </select>
+          <button type="submit" class="px-4 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition">Filter</button>
+        </form>
+        <a href="/admin/payments/new" class="flex items-center gap-2 px-5 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          Record Payment
+        </a>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="px-6 py-4">Student</th>
+                <th class="px-6 py-4">Amount</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 hidden md:table-cell">Method</th>
+                <th class="px-6 py-4 hidden lg:table-cell">Date</th>
+                <th class="px-6 py-4 hidden lg:table-cell">Invoice #</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% if (payments.length === 0) { %>
+                <tr><td colspan="7" class="px-6 py-12 text-center text-slate-400">No payment records found. <a href="/admin/payments/new" class="text-brand-navy font-semibold hover:underline">Record first payment</a>.</td></tr>
+              <% } %>
+              <% payments.forEach(p => { %>
+                <tr class="hover:bg-slate-50/60 transition">
+                  <td class="px-6 py-4">
+                    <div class="font-medium text-slate-900"><%= p.student ? p.student.name : 'Unknown' %></div>
+                    <% if (p.student && p.student.phone) { %><div class="text-xs text-slate-400"><%= p.student.phone %></div><% } %>
+                  </td>
+                  <td class="px-6 py-4 font-semibold text-brand-navy">₹<%= (p?.amount || 0).toLocaleString('en-IN') %></td>
+                  <td class="px-6 py-4">
+                    <% const payStatusColors = { completed: 'bg-emerald-50 text-emerald-700 border-emerald-200', pending: 'bg-amber-50 text-amber-700 border-amber-200', failed: 'bg-red-50 text-red-700 border-red-200' }; %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border <%= payStatusColors[p.status] || payStatusColors.pending %>"><%= p.status %></span>
+                  </td>
+                  <td class="px-6 py-4 text-slate-600 capitalize hidden md:table-cell"><%= (p.paymentMethod || '').replace('_', ' ') %></td>
+                  <td class="px-6 py-4 text-slate-500 text-xs hidden lg:table-cell"><%= p.paidDate ? new Date(p.paidDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' %></td>
+                  <td class="px-6 py-4 hidden lg:table-cell">
+                    <% if (p.invoiceNumber) { %>
+                      <a href="/admin/payments/<%= p._id %>/invoice" class="text-xs font-mono text-indigo-600 hover:text-indigo-800 hover:underline"><%= p.invoiceNumber %></a>
+                    <% } else { %>
+                      <a href="/admin/payments/<%= p._id %>/invoice" class="text-xs text-slate-400 hover:text-indigo-600 transition">Generate</a>
+                    <% } %>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <a href="/admin/payments/<%= p._id %>/invoice" title="Download Invoice" class="p-2 rounded-lg hover:bg-indigo-50 text-indigo-400 hover:text-indigo-700 transition">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      </a>
+                      <form method="POST" action="/admin/payments/<%= p._id %>/delete" onsubmit="return confirm('Delete this payment record?');">
+                        <button type="submit" class="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition" title="Delete">
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <%- include('../../partials/pagination', { currentPage, totalPages, baseUrl: '/admin/payments?' + (search ? 'search=' + search + '&' : '') + (statusFilter ? 'status=' + statusFilter + '&' : '') + (methodFilter ? 'method=' + methodFilter + '&' : '') }) %>
+
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+</body>
+</html>

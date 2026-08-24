@@ -1,0 +1,29 @@
+<%
+  /*
+   * Reusable Logo Component — views/partials/logo.ejs
+   *
+   * Props (all optional):
+   *   logoSize    : 'sm' | 'md' | 'lg'  — controls image height
+   *   logoHref    : URL to wrap in <a>
+   *   logoClass   : extra classes on wrapper
+   *
+   * Size map:
+   *   sm  → h-8  (32px)  — mobile header
+   *   md  → h-10 (40px)  — desktop navbar / sidebar
+   *   lg  → h-[70px]     — login / auth pages
+   */
+  const _size   = typeof logoSize  !== 'undefined' ? logoSize  : 'md';
+  const _href   = typeof logoHref  !== 'undefined' ? logoHref  : null;
+  const _extra  = typeof logoClass !== 'undefined' ? logoClass : '';
+  const sizeMap = { sm: 'h-8', md: 'h-10', lg: 'h-[70px]' };
+  const imgCls  = `${sizeMap[_size] || sizeMap.md} w-auto object-contain`;
+%>
+<% if (_href) { %>
+  <a href="<%= _href %>" class="inline-flex items-center shrink-0 <%= _extra %>">
+    <img src="/images/Logo.png" alt="Maths Manthra" class="<%= imgCls %>">
+  </a>
+<% } else { %>
+  <span class="inline-flex items-center shrink-0 <%= _extra %>">
+    <img src="/images/Logo.png" alt="Maths Manthra" class="<%= imgCls %>">
+  </span>
+<% } %>

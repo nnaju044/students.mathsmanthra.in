@@ -1,0 +1,41 @@
+{
+  "type": "module",
+  "name": "students.mathsmanthra",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "migrate:announcements": "node scripts/migrateAnnouncements.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^1.41.3",
+    "connect-mongo": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.6.2",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "mongoose": "^9.9.2",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^9.0.5",
+    "pdfkit": "^0.19.1",
+    "tailwindcss": "^4.3.3",
+    "web-push": "^3.6.7",
+    "xss-clean": "^0.1.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

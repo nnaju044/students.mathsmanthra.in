@@ -1,0 +1,39 @@
+<%
+  const _currentPage = typeof currentPage !== 'undefined' ? currentPage : 1;
+  const _totalPages = typeof totalPages !== 'undefined' ? totalPages : 1;
+  const _baseUrl = typeof baseUrl !== 'undefined' ? baseUrl : '?';
+%>
+<% if (_totalPages > 1) { %>
+<nav class="flex items-center justify-between pt-6">
+  <p class="text-sm text-slate-500">
+    Page <span class="font-semibold text-slate-700"><%= _currentPage %></span> of <span class="font-semibold text-slate-700"><%= _totalPages %></span>
+  </p>
+  <div class="flex items-center gap-2">
+    <% if (_currentPage > 1) { %>
+      <a href="<%= _baseUrl %>page=<%= _currentPage - 1 %>"
+         class="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+        Previous
+      </a>
+    <% } %>
+
+    <% 
+      let startP = Math.max(1, _currentPage - 2);
+      let endP = Math.min(_totalPages, _currentPage + 2);
+    %>
+    <% for (let p = startP; p <= endP; p++) { %>
+      <a href="<%= _baseUrl %>page=<%= p %>"
+         class="w-10 h-10 flex items-center justify-center text-sm font-semibold rounded-xl transition
+                <%= p === _currentPage ? 'bg-brand-navy text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' %>">
+        <%= p %>
+      </a>
+    <% } %>
+
+    <% if (_currentPage < _totalPages) { %>
+      <a href="<%= _baseUrl %>page=<%= _currentPage + 1 %>"
+         class="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+        Next
+      </a>
+    <% } %>
+  </div>
+</nav>
+<% } %>

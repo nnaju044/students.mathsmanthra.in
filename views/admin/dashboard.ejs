@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+  <div class="flex h-full min-h-screen">
+    <%- include('../layouts/sidebar', { activePage: 'Dashboard' }) %>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <%- include('../layouts/header', { pageTitle: 'Dashboard Overview', pageSubtitle: 'Welcome back to the Admin Portal.' }) %>
+
+      <main class="flex-1 px-6 sm:px-8 py-8 space-y-6 overflow-y-auto">
+
+        <!-- Stat cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16.5 8.5a3 3 0 1 0 0-6"/><path d="M15 14.5c2.7.3 4.8 1.8 5.5 4.5"/></svg>
+              Total Students
+            </div>
+            <div class="text-3xl font-extrabold text-slate-900"><%= stats.totalStudents %></div>
+            <div class="mt-2 text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              <span>&uarr;</span> +<%= stats.newStudentsThisWeek %> this week
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>
+              Active Students
+            </div>
+            <div class="text-3xl font-extrabold text-slate-900"><%= stats.activeStudents %></div>
+            <div class="mt-2 text-xs text-slate-500 font-medium"><%= stats.engagementRate %>% Engagement</div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+              Revenue Collected
+            </div>
+            <div class="text-3xl font-extrabold text-brand-navy"><%= stats.revenueCollected %></div>
+            <div class="mt-2 text-xs text-amber-600 font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              <%= stats.pendingPayments %> Pending Payments
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/></svg>
+              Running Courses
+            </div>
+            <div class="text-3xl font-extrabold text-slate-900"><%= stats.runningCourses %></div>
+            <div class="mt-2 text-xs text-slate-500 font-medium">Across <%= stats.totalBatches %> Batches</div>
+          </div>
+        </div>
+
+        <!-- Charts + Sidebar widgets -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+          <!-- Left: charts -->
+          <div class="xl:col-span-2 space-y-6">
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-slate-900">Revenue Overview</h3>
+              <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-50 text-brand-navy"> This Month</span>              </div>
+                <div class="h-64">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-bold text-slate-900">Student Growth</h3>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-50 text-brand-navy">Enrollments</span>
+              </div>
+               <div class="h-64">
+                  <canvas id="enrollmentChart"></canvas>
+                </div>
+            </div>
+          </div>
+
+          <!-- Right: quick actions + activity -->
+          <div class="space-y-6">
+
+            <div class="bg-brand-navy rounded-2xl p-6 shadow-sm">
+              <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h6l-1 8 11-14h-6l1-6Z"/></svg>
+                Quick Actions
+              </h3>
+              <div class="grid grid-cols-2 gap-3">
+                <a href="/admin/students/new" class="bg-white/10 hover:bg-white/20 rounded-xl p-4 text-white text-center transition">
+                  <svg class="w-5 h-5 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M22 11h-6"/></svg>
+                  <span class="text-xs font-semibold">Add Student</span>
+                </a>
+                <a href="/admin/courses/new" class="bg-white/10 hover:bg-white/20 rounded-xl p-4 text-white text-center transition">
+                  <svg class="w-5 h-5 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M9 8h6M9 12h4"/></svg>
+                  <span class="text-xs font-semibold">Add Course</span>
+                </a>
+                <a href="/admin/batches/new" class="bg-white/10 hover:bg-white/20 rounded-xl p-4 text-white text-center transition">
+                  <svg class="w-5 h-5 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+                  <span class="text-xs font-semibold">Create Batch</span>
+                </a>
+                <a href="/admin/payments/new" class="bg-white/10 hover:bg-white/20 rounded-xl p-4 text-white text-center transition">
+                  <svg class="w-5 h-5 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/></svg>
+                  <span class="text-xs font-semibold">Record Payment</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900">Recent Activity</h3>
+              </div>
+              <% if (activities && activities.length > 0) { %>
+                <ul class="space-y-4">
+                  <%
+                    const colorMap = { indigo: 'bg-indigo-100 text-brand-navy', amber: 'bg-amber-100 text-amber-600', blue: 'bg-blue-100 text-blue-600' };
+                    const iconMap = {
+                      student: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0"/><path d="M17 8v4M19 10h-4"/>',
+                      payment: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/>',
+                      lesson: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M8 8h8M8 12h5"/>',
+                    };
+                  %>
+                  <% activities.forEach(a => { %>
+                    <li class="flex items-start gap-3">
+                      <div class="w-8 h-8 rounded-full <%= colorMap[a.color] || colorMap.indigo %> flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><%- iconMap[a.icon] || iconMap.student %></svg>
+                      </div>
+                      <div class="text-sm text-slate-700 leading-snug">
+                        <span><%- a.text %></span>
+                        <div class="text-xs text-slate-400 mt-0.5"><%= a.time %></div>
+                      </div>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } else { %>
+                <div class="text-sm text-slate-400 text-center py-6">No recent activity. Start adding students, courses, and payments!</div>
+              <% } %>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <%- include('../layouts/footer') %>
+
+  <script>
+    // Revenue Chart
+    const revData = <%- revenueChart %>;
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'bar',
+      data: {
+        labels: revData.labels,
+        datasets: [{
+          label: 'Revenue (₹)',
+          data: revData.data,
+          backgroundColor: 'rgba(30, 42, 143, 0.8)',
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+
+    // Enrollment Chart
+    const enrollData = <%- enrollmentChart %>;
+    new Chart(document.getElementById('enrollmentChart'), {
+      type: 'line',
+      data: {
+        labels: enrollData.labels,
+        datasets: [{
+          label: 'Students',
+          data: enrollData.data,
+          borderColor: '#1e2a8f',
+          backgroundColor: 'rgba(30, 42, 143, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#1e2a8f',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

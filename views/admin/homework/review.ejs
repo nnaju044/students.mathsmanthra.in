@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Homework' }) %>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Homework Review', pageSubtitle: 'Review and grade student submissions.' }) %>
+
+    <main class="flex-1 px-6 sm:px-8 py-8 space-y-6 overflow-y-auto">
+
+      <!-- Flash -->
+      <% if (success) { %>
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span><%= success %></span>
+        </div>
+      <% } %>
+      <% if (error) { %>
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm"><%= error %></div>
+      <% } %>
+
+      <!-- Homework Info Banner -->
+      <div class="bg-brand-navy rounded-2xl p-6 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+        <div>
+          <p class="text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-1">Homework Review</p>
+          <h1 class="text-2xl font-extrabold text-white"><%= hw.title %></h1>
+          <div class="flex flex-wrap gap-3 mt-2 text-sm">
+            <span class="text-indigo-300">Lesson: <span class="text-white font-medium"><%= hw.lesson?.title || '—' %></span></span>
+            <span class="text-indigo-300">Course: <span class="text-white font-medium"><%= hw.course?.title || '—' %></span></span>
+            <% if (hw.batch) { %><span class="text-indigo-300">Batch: <span class="text-white font-medium"><%= hw.batch.batchName %></span></span><% } %>
+            <% if (hw.dueDate) { %><span class="text-indigo-300">Due: <span class="text-white font-medium"><%= new Date(hw.dueDate).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></span></span><% } %>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-white/10 rounded-xl px-5 py-3 text-center">
+            <div class="text-3xl font-extrabold text-white"><%= submissions.length %></div>
+            <div class="text-xs text-indigo-300 font-medium">Submissions</div>
+          </div>
+          <a href="/admin/homework" class="bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">← Back</a>
+        </div>
+      </div>
+
+      <!-- Submissions -->
+      <% if (submissions && submissions.length > 0) { %>
+        <div class="space-y-6">
+          <% submissions.forEach((sub, i) => { %>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <!-- Student Header -->
+              <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <%= (sub?.student?.name || 'S').charAt(0).toUpperCase() %>
+                  </div>
+                  <div>
+                    <div class="font-bold text-slate-900"><%= sub?.student?.name || 'Unknown Student' %></div>
+                    <div class="text-xs text-slate-500 flex gap-3 flex-wrap mt-0.5">
+                      <span><%= sub?.student?.email || '' %></span>
+                      <span><%= sub?.student?.phone || '' %></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-xs text-slate-400">Submitted: <%= sub?.submittedAt ? new Date(sub.submittedAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—' %></div>
+                  <%
+                    const statusColors = {
+                      pending: 'bg-amber-100 text-amber-700',
+                      review: 'bg-blue-100 text-blue-700',
+                      approved: 'bg-emerald-100 text-emerald-700',
+                      rejected: 'bg-red-100 text-red-600',
+                    };
+                    const rawSubStatus = sub?.status || 'pending';
+                    const safeSubStatus = (typeof rawSubStatus === 'string' && rawSubStatus.length > 0)
+                      ? (rawSubStatus.charAt(0).toUpperCase() + rawSubStatus.slice(1).toLowerCase())
+                      : 'Pending';
+                  %>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold <%= statusColors[rawSubStatus] || statusColors.pending %>">
+                    <%= safeSubStatus %>
+                  </span>
+                </div>
+              </div>
+
+              <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Submission Links -->
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand-navy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    Submitted Links (<%= sub.submissionLinks?.length || 0 %>)
+                  </h3>
+                  <div class="space-y-2">
+                    <% (sub.submissionLinks || []).forEach((link, idx) => { %>
+                      <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer"
+                         class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-brand-navy hover:bg-indigo-50 transition group">
+                        <span class="w-6 h-6 rounded-full bg-brand-navy text-white text-xs font-bold flex items-center justify-center shrink-0"><%= idx + 1 %></span>
+                        <div class="flex-1 min-w-0">
+                          <% if (link.label) { %><div class="text-xs font-semibold text-slate-600"><%= link.label %></div><% } %>
+                          <div class="text-sm text-brand-navy truncate group-hover:underline"><%= link.url %></div>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      </a>
+                    <% }) %>
+                  </div>
+
+                  <!-- Show existing feedback -->
+                  <% if (sub.feedback || sub.marks) { %>
+                    <div class="mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                      <% if (sub.marks) { %><div class="text-sm font-semibold text-emerald-800">Marks: <%= sub.marks %></div><% } %>
+                      <% if (sub.rating) { %><div class="text-sm text-emerald-700">Rating: <%= sub.rating %>/5 ⭐</div><% } %>
+                      <% if (sub.feedback) { %><div class="text-sm text-emerald-700">Feedback: <%= sub.feedback %></div><% } %>
+                    </div>
+                  <% } %>
+                </div>
+
+                <!-- Review Form -->
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand-navy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Review & Grade
+                  </h3>
+                  <form method="POST" action="/admin/homework/submissions/<%= sub._id %>/review" class="space-y-3">
+                    <input type="hidden" name="homeworkId" value="<%= hw._id %>"/>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                      <select name="status" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-navy/30">
+                        <option value="pending" <%= sub.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="review" <%= sub.status === 'review' ? 'selected' : '' %>>Under Review</option>
+                        <option value="approved" <%= sub.status === 'approved' ? 'selected' : '' %>>Approved ✓</option>
+                        <option value="rejected" <%= sub.status === 'rejected' ? 'selected' : '' %>>Rejected ✗</option>
+                      </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Marks</label>
+                        <input type="text" name="marks" value="<%= sub.marks || '' %>" placeholder="e.g., 8/10"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30"/>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Rating (0–5)</label>
+                        <input type="number" name="rating" value="<%= sub.rating || '' %>" min="0" max="5" step="0.5" placeholder="e.g., 4.5"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30"/>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-600 mb-1">Feedback</label>
+                      <textarea name="feedback" rows="3" placeholder="Write feedback for the student..."
+                                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 resize-none"><%= sub.feedback || '' %></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-2.5 bg-brand-navy hover:bg-brand-navyDark text-white font-semibold text-sm rounded-xl transition">
+                      Save Review
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-16 text-center">
+          <svg class="w-12 h-12 mx-auto text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <p class="text-slate-500 font-medium">No submissions yet for this homework.</p>
+          <p class="text-slate-400 text-sm mt-1">Students will appear here once they submit their work.</p>
+        </div>
+      <% } %>
+
+    </main>
+  </div>
+</div>
+
+<%- include('../../layouts/footer') %>
+</body>
+</html>

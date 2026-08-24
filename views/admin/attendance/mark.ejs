@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Attendance' }) %>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Mark Attendance', pageSubtitle: 'Record today\'s class attendance.' }) %>
+
+    <main class="flex-1 px-6 sm:px-8 py-8 space-y-6 overflow-y-auto">
+
+      <% if (success) { %>
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span><%= success %></span>
+        </div>
+      <% } %>
+      <% if (error) { %>
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm"><%= error %></div>
+      <% } %>
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <a href="/admin/attendance" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-navy transition font-medium mb-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
+          </a>
+          <h1 class="text-2xl font-extrabold text-slate-900"><%= batch.batchName %></h1>
+          <p class="text-sm text-slate-500 mt-0.5">
+            Attendance for: <span class="font-semibold text-slate-700"><%= new Date(date).toLocaleDateString('en-IN', {weekday:'long', day:'numeric',month:'long',year:'numeric'}) %></span>
+          </p>
+        </div>
+        <!-- Bulk Actions -->
+        <div class="flex gap-2">
+          <button onclick="markAll('present')" class="px-4 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-semibold text-sm rounded-xl transition">
+            ✓ All Present
+          </button>
+          <button onclick="markAll('absent')" class="px-4 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 font-semibold text-sm rounded-xl transition">
+            ✗ All Absent
+          </button>
+        </div>
+      </div>
+
+      <% if (batch.students && batch.students.length > 0) { %>
+        <form method="POST" action="/admin/attendance/mark" class="space-y-4">
+          <input type="hidden" name="batchId" value="<%= batch._id %>"/>
+          <input type="hidden" name="date" value="<%= date %>"/>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h2 class="font-bold text-slate-900">Students (<%= batch.students.length %>)</h2>
+              <div class="flex gap-4 text-xs font-semibold text-slate-500">
+                <span class="text-emerald-600">Present</span>
+                <span class="text-amber-600">Late</span>
+                <span class="text-red-500">Absent</span>
+              </div>
+            </div>
+
+            <div class="divide-y divide-slate-100">
+              <% batch.students.forEach((student, i) => {
+                const existing = existingMap[student._id.toString()];
+              %>
+                <div class="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition">
+                  <div class="flex items-center gap-4">
+                    <div class="w-9 h-9 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      <%= (student?.name || 'S').charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <div class="font-semibold text-slate-900"><%= student?.name || 'Unknown Student' %></div>
+                      <div class="text-xs text-slate-400"><%= student?.email || student?.phone || '' %></div>
+                    </div>
+                  </div>
+
+                  <!-- Radio buttons -->
+                  <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="attendance[<%= student._id %>]" value="present"
+                             <%= (!existing || existing === 'present') ? 'checked' : '' %>
+                             class="w-4 h-4 accent-emerald-600"/>
+                      <span class="text-sm text-emerald-700 font-medium">Present</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="attendance[<%= student._id %>]" value="late"
+                             <%= existing === 'late' ? 'checked' : '' %>
+                             class="w-4 h-4 accent-amber-500"/>
+                      <span class="text-sm text-amber-700 font-medium">Late</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="attendance[<%= student._id %>]" value="absent"
+                             <%= existing === 'absent' ? 'checked' : '' %>
+                             class="w-4 h-4 accent-red-500"/>
+                      <span class="text-sm text-red-600 font-medium">Absent</span>
+                    </label>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-4 bg-brand-navy hover:bg-brand-navyDark text-white font-bold text-base rounded-2xl transition shadow-sm">
+            Save Attendance for <%= batch.students.length %> Students
+          </button>
+        </form>
+      <% } else { %>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-16 text-center">
+          <p class="text-slate-500 font-medium">No students in this batch yet.</p>
+          <a href="/admin/students" class="mt-2 inline-block text-brand-navy font-semibold text-sm hover:underline">Add students →</a>
+        </div>
+      <% } %>
+
+    </main>
+  </div>
+</div>
+
+<%- include('../../layouts/footer') %>
+
+<script>
+function markAll(status) {
+  document.querySelectorAll(`input[type="radio"][value="${status}"]`).forEach(r => r.checked = true);
+}
+</script>
+</body>
+</html>

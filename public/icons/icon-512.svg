@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="clip-512">
+      <rect x="0" y="0" width="512" height="512" rx="92" ry="92"/>
+    </clipPath>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="92" ry="92" fill="#1e2a8f"/>
+  <text x="256" y="256" font-family="Arial,sans-serif" font-size="281" font-weight="bold" fill="#f59e0b" text-anchor="middle" dominant-baseline="central">M</text>
+</svg>

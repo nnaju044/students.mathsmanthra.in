@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../partials/head') %></head>
+<body class="bg-slate-50 text-slate-800" style="min-height:100svh">
+
+<%- include('../partials/student-nav', { student, activePage: 'Profile' }) %>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5 pb-safe lg:pb-8">
+
+  <!-- Flash -->
+  <% if (success) { %>
+    <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+  <% if (error) { %>
+    <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm"><%= error %></div>
+  <% } %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left: Profile Card -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+        <!-- Profile Photo -->
+        <div class="relative inline-block mb-4">
+          <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-brand-navy mx-auto">
+            <% if (student?.profileImage) { %>
+              <img src="<%= student.profileImage %>" alt="<%= student?.name || 'Student' %>" class="w-full h-full object-cover"/>
+            <% } else { %>
+              <div class="w-full h-full bg-brand-navy flex items-center justify-center text-white text-3xl font-bold">
+                <%= (student?.name || 'S').charAt(0).toUpperCase() %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+        <h1 class="text-xl font-extrabold text-slate-900"><%= student.name %></h1>
+        <p class="text-sm text-slate-500 mt-0.5"><%= student.email %></p>
+        <% if (student.phone) { %><p class="text-sm text-slate-500"><%= student.phone %></p><% } %>
+
+        <!-- Course / Batch Info -->
+        <div class="mt-4 pt-4 border-t border-slate-100 space-y-2 text-left">
+          <% if (student?.course) { %>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Course</span>
+              <span class="text-sm font-semibold text-slate-800"><%= student.course.title %></span>
+            </div>
+          <% } %>
+          <% if (student?.batch) { %>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Batch</span>
+              <span class="text-sm font-semibold text-slate-800"><%= student.batch.batchName %></span>
+            </div>
+          <% } %>
+          <% if (student?.status) {
+            const rawStatus = student.status || 'active';
+            const safeStatus = (typeof rawStatus === 'string' && rawStatus.length > 0)
+              ? (rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase())
+              : 'Active';
+          %>
+            <div class="flex justify-between">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold <%= student.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' %>">
+                <%= safeStatus %>
+              </span>
+            </div>
+          <% } %>
+        </div>
+
+        <a href="/change-password" class="mt-5 w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 rounded-xl transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Change Password
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Edit Form -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="text-lg font-bold text-slate-900 mb-5">Edit Profile</h2>
+
+        <form method="POST" action="/profile" enctype="multipart/form-data" class="space-y-4">
+
+          
+
+          <!-- Name — read only (only admin can change) -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
+            <input type="text" value="<%= student.name %>" disabled
+                   class="w-full px-4 py-3 rounded-xl border border-slate-100 text-sm text-slate-400 bg-slate-50 cursor-not-allowed"/>
+            <p class="text-xs text-slate-400 mt-1">Name can only be changed by admin.</p>
+          </div>
+
+          <!-- Email — read only -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Email</label>
+            <input type="email" value="<%= student.email %>" disabled
+                   class="w-full px-4 py-3 rounded-xl border border-slate-100 text-sm text-slate-400 bg-slate-50 cursor-not-allowed"/>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label>
+            <input type="tel" name="phone" value="<%= student.phone || '' %>" placeholder="Your phone number"
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30"/>
+          </div>
+
+          <!-- Address -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Address</label>
+            <input type="text" name="address" value="<%= student.address || '' %>" placeholder="Your address"
+                   class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30"/>
+          </div>
+
+          <!-- Bio -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Bio / Note</label>
+            <textarea name="bio" rows="3" placeholder="Tell something about yourself..."
+                      class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 resize-none"><%= student.bio || '' %></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-brand-navy hover:bg-brand-navyDark text-white font-bold text-sm rounded-xl transition shadow-sm">
+            Save Profile
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

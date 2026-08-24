@@ -1,0 +1,55 @@
+{
+  "name": "Maths Manthra",
+  "short_name": "MathsManthra",
+  "description": "Your personal student portal for Maths Manthra — lessons, homework, announcements, and payments.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e2a8f",
+  "categories": ["education"],
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/icons/icon-72.svg",  "sizes": "72x72",   "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-96.svg",  "sizes": "96x96",   "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-128.svg", "sizes": "128x128", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-144.svg", "sizes": "144x144", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-152.svg", "sizes": "152x152", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-384.svg", "sizes": "384x384", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-mobile.svg",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Maths Manthra Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Open your student dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Homework",
+      "short_name": "Homework",
+      "description": "View and submit your homework",
+      "url": "/homework",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Lessons",
+      "short_name": "Lessons",
+      "description": "Access your lessons",
+      "url": "/lessons",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}

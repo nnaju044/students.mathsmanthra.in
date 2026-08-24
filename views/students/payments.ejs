@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../partials/head') %></head>
+<body class="bg-slate-50 text-slate-800" style="min-height:100svh">
+
+<%- include('../partials/student-nav', { student, activePage: 'Payments' }) %>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-5 pb-safe lg:pb-8">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-extrabold text-slate-900">My Payments</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Payment history and pending fees</p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-3 gap-3 sm:gap-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+      <div class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Total Paid</div>
+      <div class="text-xl sm:text-3xl font-extrabold text-emerald-600">₹<%= (totalPaid || 0).toLocaleString('en-IN') %></div>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+      <div class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Pending</div>
+      <div class="text-xl sm:text-3xl font-extrabold <%= (totalPending || 0) > 0 ? 'text-red-500' : 'text-slate-300' %>">₹<%= (totalPending || 0).toLocaleString('en-IN') %></div>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+      <div class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Total</div>
+      <div class="text-xl sm:text-3xl font-extrabold text-slate-900"><%= (payments || []).length %></div>
+    </div>
+  </div>
+
+  <!-- Pending / Overdue Alert -->
+  <% if ((totalPending || 0) > 0) { %>
+    <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+      <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <div class="font-semibold text-amber-800 text-sm">You have pending dues of ₹<%= (totalPending || 0).toLocaleString('en-IN') %></div>
+        <div class="text-xs text-amber-700 mt-0.5">Please contact your teacher or admin to clear pending dues.</div>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Payment History -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Payment History</h2>
+    </div>
+
+    <% if (payments && payments.length > 0) { %>
+
+      <%
+        const statusColors = {
+          completed: 'bg-emerald-100 text-emerald-700',
+          pending:   'bg-amber-100 text-amber-700',
+          overdue:   'bg-red-100 text-red-600',
+          failed:    'bg-slate-100 text-slate-500',
+        };
+      %>
+
+      <!-- ══ MOBILE CARD LIST (hidden on desktop) ══ -->
+      <div class="divide-y divide-slate-100 sm:hidden">
+        <% payments.forEach(payment => { %>
+          <%
+            const rawPayStatus = payment?.status || 'pending';
+            const safePayStatus = (typeof rawPayStatus === 'string' && rawPayStatus.length > 0)
+              ? (rawPayStatus.charAt(0).toUpperCase() + rawPayStatus.slice(1).toLowerCase())
+              : 'Pending';
+            const payDate = new Date(payment.paidDate || payment.createdAt || Date.now())
+              .toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+          %>
+          <div class="px-5 py-4">
+            <!-- Top row: Amount + Status badge -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-lg font-extrabold text-slate-900">₹<%= (payment.amount || 0).toLocaleString('en-IN') %></span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold <%= statusColors[rawPayStatus] || statusColors.pending %>">
+                <%= safePayStatus %>
+              </span>
+            </div>
+            <!-- Course -->
+            <div class="font-semibold text-slate-800 text-sm mb-1"><%= payment.course?.title || '—' %></div>
+            <% if (payment.batch) { %>
+              <div class="text-xs text-slate-500 mb-1"><%= payment.batch.batchName %></div>
+            <% } %>
+            <!-- Meta row -->
+            <div class="flex items-center gap-3 flex-wrap text-xs text-slate-400 mt-1.5">
+              <span><%= payDate %></span>
+              <span class="capitalize"><%= (payment.paymentMethod || 'Cash').replace('_', ' ') %></span>
+              <% if (payment.transactionId) { %>
+                <span class="font-mono truncate max-w-[120px]"><%= payment.transactionId %></span>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <!-- ══ DESKTOP TABLE (hidden on mobile) ══ -->
+      <div class="hidden sm:block overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+              <th class="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Course / Batch</th>
+              <th class="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Method</th>
+              <th class="px-4 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Transaction ID</th>
+              <th class="px-4 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+              <th class="px-4 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% payments.forEach(payment => { %>
+              <%
+                const rawPayStatus = payment?.status || 'pending';
+                const safePayStatus = (typeof rawPayStatus === 'string' && rawPayStatus.length > 0)
+                  ? (rawPayStatus.charAt(0).toUpperCase() + rawPayStatus.slice(1).toLowerCase())
+                  : 'Pending';
+              %>
+              <tr class="hover:bg-slate-50 transition">
+                <td class="px-6 py-4 text-slate-600">
+                  <%= new Date(payment.paidDate || payment.createdAt || Date.now()).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="font-medium text-slate-900"><%= payment.course?.title || '—' %></div>
+                  <% if (payment.batch) { %><div class="text-xs text-slate-400"><%= payment.batch.batchName %></div><% } %>
+                </td>
+                <td class="px-4 py-4 text-slate-600 capitalize"><%= (payment.paymentMethod || 'cash').replace('_', ' ') %></td>
+                <td class="px-4 py-4 text-slate-500 font-mono text-xs"><%= payment.transactionId || '—' %></td>
+                <td class="px-4 py-4 text-right font-bold text-slate-900">₹<%= (payment.amount || 0).toLocaleString('en-IN') %></td>
+                <td class="px-4 py-4 text-center">
+                  <span class="px-2.5 py-1 rounded-full text-xs font-bold <%= statusColors[rawPayStatus] || statusColors.pending %>">
+                    <%= safePayStatus %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+    <% } else { %>
+      <div class="py-16 text-center">
+        <svg class="w-10 h-10 mx-auto text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>
+        <p class="text-slate-500 font-medium">No payment records found.</p>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+</body>
+</html>

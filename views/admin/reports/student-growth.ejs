@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Reports' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Student Growth Report', pageSubtitle: 'Last 12 months enrollment trends' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <a href="/admin/reports/revenue" class="px-4 py-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">Revenue</a>
+          <a href="/admin/reports/attendance" class="px-4 py-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">Attendance</a>
+        </div>
+        <a href="/admin/reports/student-growth/export"
+           class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export XLSX
+        </a>
+      </div>
+
+      <!-- Chart -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+        <h3 class="text-sm font-semibold text-slate-600 mb-4">Student Enrollment Trend</h3>
+        <canvas id="growthChart" height="100"></canvas>
+      </div>
+
+      <!-- Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="px-6 py-4">Month</th>
+                <th class="px-6 py-4">New Students</th>
+                <th class="px-6 py-4">Active</th>
+                <th class="px-6 py-4">Inactive</th>
+                <th class="px-6 py-4">Graduated</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% monthsData.forEach(row => { %>
+              <tr class="hover:bg-slate-50/60 transition">
+                <td class="px-6 py-4 font-semibold text-slate-800"><%= row.month %></td>
+                <td class="px-6 py-4 font-bold text-emerald-700"><%= row.newStudents %></td>
+                <td class="px-6 py-4 text-blue-700"><%= row.activeStudents %></td>
+                <td class="px-6 py-4 text-amber-700"><%= row.inactiveStudents %></td>
+                <td class="px-6 py-4 text-purple-700"><%= row.graduatedStudents %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: <%- chartLabels %>,
+      datasets: [
+        { label: 'New Students', data: <%- newStudentsData %>, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, pointRadius: 5 },
+        { label: 'Active Students', data: <%- activeStudentsData %>, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.05)', fill: false, tension: 0.4, pointRadius: 4, borderDash: [5,5] }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#64748b', font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+        x: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+</script>
+</body>
+</html>

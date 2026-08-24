@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+<%
+const studentsSafe = typeof students !== 'undefined' ? students : [];
+const searchSafe = typeof search !== 'undefined' ? search : '';
+const statusFilterSafe = typeof statusFilter !== 'undefined' ? statusFilter : '';
+const feeFilterSafe = typeof feeFilter !== 'undefined' ? feeFilter : '';
+const totalCountSafe = typeof totalCount !== 'undefined' ? totalCount : 0;
+const currentPageSafe = typeof currentPage !== 'undefined' ? currentPage : 1;
+const totalPagesSafe = typeof totalPages !== 'undefined' ? totalPages : 1;
+%>
+
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Students' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Students', pageSubtitle: totalCountSafe + ' total students' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <!-- Actions Bar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <form method="GET" action="/admin/students" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 w-full sm:w-64">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="search" value="<%= searchSafe %>" placeholder="Search students..." class="bg-transparent text-sm placeholder-slate-400 focus:outline-none w-full" />
+          </div>
+          <select name="status" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none">
+            <option value="">All Status</option>
+            <option value="active" <%= statusFilterSafe === 'active' ? 'selected' : '' %>>Active</option>
+            <option value="inactive" <%= statusFilterSafe === 'inactive' ? 'selected' : '' %>>Inactive</option>
+            <option value="graduated" <%= statusFilterSafe === 'graduated' ? 'selected' : '' %>>Graduated</option>
+          </select>
+          <select name="feeStatus" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none">
+            <option value="">All Fee Status</option>
+            <option value="paid" <%= feeFilterSafe === 'paid' ? 'selected' : '' %>>Paid</option>
+            <option value="pending" <%= feeFilterSafe === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="overdue" <%= feeFilterSafe === 'overdue' ? 'selected' : '' %>>Overdue</option>
+          </select>
+          <button type="submit" class="px-4 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition">Filter</button>
+        </form>
+        <a href="/admin/students/new" class="flex items-center gap-2 px-5 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navyDark transition shrink-0">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          Add Student
+        </a>
+      </div>
+
+      <!-- Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Phone</th>
+                <th class="px-6 py-4 hidden md:table-cell">Course</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 hidden sm:table-cell">Fee</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% if (studentsSafe.length === 0) { %>
+                <tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No students found. <a href="/admin/students/new" class="text-brand-navy font-semibold hover:underline">Add your first student</a>.</td></tr>
+              <% } %>
+              <% studentsSafe.forEach(s => { %>
+                <tr class="hover:bg-slate-50/60 transition">
+                  <td class="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-navy/10 text-brand-navy flex items-center justify-center text-xs font-bold shrink-0"><%= (s?.name || 'S').charAt(0).toUpperCase() %></div>
+                    <div>
+                      <div><%= s?.name || 'Unknown' %></div>
+                      <% if (s?.email) { %><div class="text-xs text-slate-400"><%= s.email %></div><% } %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-slate-600"><%= s.phone %></td>
+                  <td class="px-6 py-4 text-slate-600 hidden md:table-cell"><%= s.course ? s.course.title : '—' %></td>
+                  <td class="px-6 py-4">
+                    <% const statusColors = { active: 'bg-emerald-50 text-emerald-700 border-emerald-200', inactive: 'bg-slate-100 text-slate-600 border-slate-200', graduated: 'bg-blue-50 text-blue-700 border-blue-200' }; %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border <%= statusColors[s.status] || statusColors.active %>"><%= s.status %></span>
+                  </td>
+                  <td class="px-6 py-4 hidden sm:table-cell">
+                    <% const feeColors = { paid: 'bg-emerald-50 text-emerald-700 border-emerald-200', pending: 'bg-amber-50 text-amber-700 border-amber-200', overdue: 'bg-red-50 text-red-700 border-red-200' }; %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold border <%= feeColors[s.feeStatus] || feeColors.pending %>"><%= s.feeStatus %></span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a href="/admin/students/<%= s._id %>/edit" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition" title="Edit">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                      </a>
+                      <form method="POST" action="/admin/students/<%= s._id %>/delete" onsubmit="return confirm('Delete this student?');" class="inline">
+                        <button type="submit" class="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition" title="Delete">
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+<%- include('../../partials/pagination', {
+  currentPage: currentPageSafe,
+  totalPages: totalPagesSafe,
+  baseUrl: '/admin/students?' +
+    (searchSafe ? 'search=' + searchSafe + '&' : '') +
+    (statusFilterSafe ? 'status=' + statusFilterSafe + '&' : '') +
+    (feeFilterSafe ? 'feeStatus=' + feeFilterSafe + '&' : '')
+}) %>
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+</body>
+</html>

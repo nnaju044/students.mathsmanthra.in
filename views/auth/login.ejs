@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('../partials/head') %>
+    <style>
+      body {
+        background: linear-gradient(135deg, #1e2a8f 0%, #151f6e 50%, #0f1547 100%);
+      }
+
+      .card-shadow {
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md">
+
+    <!-- Brand Header -->
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-center mb-4">
+        <img src="/images/Logo.png" alt="Maths Manthra" style="height:70px;"
+          class="w-auto object-contain drop-shadow-md">
+      </div>
+      <p class="text-white/50 text-sm mt-1 font-medium">Student Portal</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-white rounded-3xl card-shadow p-8">
+      <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Welcome back</h2>
+      <p class="text-slate-500 text-sm mb-6">Sign in to access your courses and lessons.</p>
+
+      <!-- Flash Messages -->
+      <% if (error) { %>
+        <div class="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-2">
+          <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>
+            <%= error %>
+          </span>
+        </div>
+        <% } %>
+          <% if (success) { %>
+            <div
+              class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-start gap-2">
+              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                <%= success %>
+              </span>
+            </div>
+            <% } %>
+
+              <!-- Form -->
+              <form method="POST" action="/login" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Email
+                    Address</label>
+                  <input id="email" type="email" name="email" required autocomplete="email" placeholder="your@email.com"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/20 transition" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                  <div class="relative">
+                    <input id="passwordInput" type="password" name="password" required autocomplete="current-password"
+                      placeholder="Enter your password"
+                      class="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-brand-navy focus:ring-2 focus:ring-brand-navy/20 transition" />
+                    <button type="button" id="eyeBtn"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition p-1 z-10"
+                      aria-label="Toggle password visibility">
+                      <svg id="eyeIconShow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <svg id="eyeIconHide" class="w-5 h-5 hidden" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <button type="submit"
+                  class="w-full py-3.5 bg-brand-navy hover:bg-brand-navyDark text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-brand-navy/30 active:scale-[0.98] mt-2">
+                  Sign In to Portal
+                </button>
+              </form>
+
+              <!-- Hint -->
+              <div class="mt-5 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <p class="text-xs text-amber-800 font-medium flex items-start gap-2">
+                  <svg class="w-4 h-4 shrink-0 mt-0.5 text-amber-600" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span><strong>First time signing in?</strong> Your temporary password is your <strong>phone
+                      number</strong>. You'll be asked to set a new one after signing in.</span>
+                </p>
+              </div>
+
+              <!-- Admin link -->
+              <div class="mt-5 text-center">
+                <a href="/admin/login" class="text-xs text-slate-400 hover:text-slate-600 transition">Admin? Sign in
+                  here →</a>
+              </div>
+    </div>
+
+    <p class="text-center text-white/30 text-xs mt-6">&copy; <%= new Date().getFullYear() %> Maths Manthra. All rights
+        reserved.</p>
+  </div>
+
+  <script>
+    (function() {
+      const eyeBtn = document.getElementById('eyeBtn');
+      const passwordInput = document.getElementById('passwordInput');
+      const eyeIconShow = document.getElementById('eyeIconShow');
+      const eyeIconHide = document.getElementById('eyeIconHide');
+
+      if (eyeBtn && passwordInput) {
+        console.log("👁️ Eye button toggle initialized");
+        eyeBtn.addEventListener('click', function() {
+          console.log("👁️ Eye button clicked!");
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          console.log("👁️ Input type changed to:", passwordInput.type);
+          if (isPassword) {
+            eyeIconShow.classList.add('hidden');
+            eyeIconHide.classList.remove('hidden');
+          } else {
+            eyeIconShow.classList.remove('hidden');
+            eyeIconHide.classList.add('hidden');
+          }
+        });
+      } else {
+        console.error("👁️ Eye toggle: elements not found!", { eyeBtn, passwordInput });
+      }
+    })();
+  </script>
+</body>
+
+</html>

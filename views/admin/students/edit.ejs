@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'Students' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'Edit Student', pageSubtitle: 'Update student information.' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+
+          <% if (error) { %>
+            <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm"><%= error %></div>
+          <% } %>
+
+          <form method="POST" action="/admin/students/<%= student._id %>" class="space-y-5">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Full Name <span class="text-red-500">*</span></label>
+                <input type="text" name="name" required value="<%= student.name %>"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Phone <span class="text-red-500">*</span></label>
+                <input type="tel" name="phone" required value="<%= student.phone %>"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Email</label>
+              <input type="email" name="email" value="<%= student.email || '' %>"
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Parent Name</label>
+                <input type="text" name="parentName" value="<%= student.parentName || '' %>"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Parent Phone</label>
+                <input type="tel" name="parentPhone" value="<%= student.parentPhone || '' %>"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Course</label>
+                <select name="course" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition">
+                  <option value="">Select Course</option>
+                  <% courses.forEach(c => { %>
+                    <option value="<%= c._id %>" <%= student.course && student.course.toString() === c._id.toString() ? 'selected' : '' %>><%= c.title %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Batch</label>
+                <select name="batch" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition">
+                  <option value="">Select Batch</option>
+                  <% batches.forEach(b => { %>
+                    <option value="<%= b._id %>" <%= student.batch && student.batch.toString() === b._id.toString() ? 'selected' : '' %>><%= b.batchName %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Student Status</label>
+                <select name="status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition">
+                  <option value="active" <%= student.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="inactive" <%= student.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  <option value="graduated" <%= student.status === 'graduated' ? 'selected' : '' %>>Graduated</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Fee Status</label>
+                <select name="feeStatus" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/30 text-sm transition">
+                  <option value="pending" <%= student.feeStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                  <option value="paid" <%= student.feeStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+                  <option value="overdue" <%= student.feeStatus === 'overdue' ? 'selected' : '' %>>Overdue</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+              <a href="/admin/students" class="px-5 py-3 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Cancel</a>
+              <button type="submit" class="px-6 py-3 bg-brand-navy hover:bg-brand-navyDark text-white font-bold text-sm rounded-xl shadow-sm transition">
+                Save Changes
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+</body>
+</html>

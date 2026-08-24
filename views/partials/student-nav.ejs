@@ -1,0 +1,278 @@
+<%
+  const _student = (typeof student !== 'undefined' && student) ? student : { name: 'Student', email: '' };
+  const _activePage = typeof activePage !== 'undefined' ? activePage : '';
+  const navItems = [
+    { label: 'Dashboard',      href: '/dashboard',     icon: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>' },
+    { label: 'Lessons',        href: '/lessons',        icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M9 8h6M9 12h4"/>' },
+    { label: 'Homework',       href: '/homework',       icon: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
+    { label: 'Announcements',  href: '/announcements',  icon: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 9a3 3 0 0 1 0 6"/>' },
+    { label: 'Profile',        href: '/profile',        icon: '<circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/>' },
+  ];
+  const drawerExtras = [
+    { label: 'Payments',         href: '/payments',        icon: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6 15h4"/>' },
+    { label: 'Change Password',  href: '/change-password', icon: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' },
+  ];
+%>
+
+<!-- ═══════════════════════════════════════════════════════
+     STUDENT MOBILE TOP HEADER (visible on < lg)
+     ═══════════════════════════════════════════════════════ -->
+<header class="student-top-header lg:hidden" id="studentMobileHeader">
+  <div class="flex items-center justify-between px-4 h-14 gap-3">
+
+    <!-- Hamburger -->
+    <button onclick="openStudentDrawer()" id="drawerHamburger"
+            class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition active:scale-90"
+            aria-label="Open menu">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <!-- Logo + Page title -->
+    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+      <!-- sm = h-8 = 32px -->
+      <%- include('./logo', { logoSize: 'sm' }) %>
+      <span class="font-extrabold text-brand-navy text-base truncate"><%= _activePage || 'Maths Manthra' %></span>
+    </div>
+
+    <!-- Avatar -->
+    <a href="/profile" class="w-9 h-9 rounded-full overflow-hidden border-2 border-brand-navy shrink-0 flex items-center justify-center bg-brand-navy text-white font-bold text-sm"
+       aria-label="My Profile">
+      <% if (_student && _student.profileImage) { %>
+        <img src="<%= _student.profileImage %>" alt="<%= _student.name %>" class="w-full h-full object-cover"/>
+      <% } else { %>
+        <span><%= ((_student && _student.name) ? _student.name : 'S').charAt(0).toUpperCase() %></span>
+      <% } %>
+    </a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════
+     STUDENT DESKTOP NAVBAR (visible on >= lg)
+     ═══════════════════════════════════════════════════════ -->
+<nav class="hidden lg:block bg-white border-b border-slate-200 sticky top-0 z-30">
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+
+    <!-- Logo — md = h-10 = 40px -->
+    <a href="/dashboard" class="flex items-center gap-2 shrink-0">
+      <%- include('./logo', { logoSize: 'md' }) %>
+      <span class="font-extrabold text-brand-navy text-lg">Maths Manthra</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="flex items-center gap-1">
+      <% navItems.concat(drawerExtras.slice(0,1)).forEach(item => { %>
+        <a href="<%= item.href %>"
+           class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition
+                  <%= _activePage === item.label ? 'bg-brand-navy text-white' : 'text-slate-600 hover:bg-slate-100' %>">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><%- item.icon %></svg>
+          <%= item.label %>
+        </a>
+      <% }) %>
+    </div>
+
+    <!-- Right: Student info + profile dropdown -->
+    <div class="flex items-center gap-3 relative">
+      <div class="hidden sm:block text-right">
+        <div class="text-sm font-semibold text-slate-800 leading-tight"><%= _student.name %></div>
+        <div class="text-xs text-slate-400 leading-tight"><%= _student.email || 'Student' %></div>
+      </div>
+
+      <!-- Avatar dropdown -->
+      <div class="relative" id="desktopAvatarMenu">
+        <button onclick="toggleDesktopAvatarMenu()"
+                class="w-9 h-9 rounded-full overflow-hidden border-2 border-brand-navy shrink-0 focus:outline-none">
+          <% if (_student && _student.profileImage) { %>
+            <img src="<%= _student.profileImage %>" alt="<%= _student.name %>" class="w-full h-full object-cover"/>
+          <% } else { %>
+            <div class="w-full h-full bg-brand-navy text-white flex items-center justify-center font-bold text-sm">
+              <%= ((_student && _student.name) ? _student.name : 'S').charAt(0).toUpperCase() %>
+            </div>
+          <% } %>
+        </button>
+
+        <div id="desktopAvatarDropdown"
+             class="hidden absolute right-0 top-12 w-48 bg-white rounded-2xl border border-slate-200 shadow-lg py-2 z-50">
+          <a href="/profile" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
+            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+            My Profile
+          </a>
+          <a href="/change-password" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition">
+            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Change Password
+          </a>
+          <div class="border-t border-slate-100 my-1"></div>
+          <a href="/logout" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     MOBILE DRAWER OVERLAY
+     ═══════════════════════════════════════════════════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeStudentDrawer()" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MOBILE SLIDE-IN DRAWER
+     ═══════════════════════════════════════════════════════ -->
+<aside class="student-drawer lg:hidden" id="studentDrawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+  <!-- Drawer Header -->
+  <div class="bg-brand-navy px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-5">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <!-- drawer logo: h-9 = 36px -->
+        <img src="/images/Logo.png" alt="Maths Manthra" style="height:36px;" class="w-auto object-contain">
+        <span class="font-extrabold text-white text-base">Maths Manthra</span>
+      </div>
+      <button onclick="closeStudentDrawer()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white/80 hover:bg-white/20 transition"
+              aria-label="Close menu">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Student info in drawer -->
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/30 shrink-0 flex items-center justify-center bg-white/20 text-white font-bold text-base">
+        <% if (_student && _student.profileImage) { %>
+          <img src="<%= _student.profileImage %>" alt="<%= _student.name %>" class="w-full h-full object-cover"/>
+        <% } else { %>
+          <%= ((_student && _student.name) ? _student.name : 'S').charAt(0).toUpperCase() %>
+        <% } %>
+      </div>
+      <div class="min-w-0">
+        <div class="font-bold text-white text-sm truncate"><%= _student.name %></div>
+        <div class="text-xs text-indigo-300 truncate"><%= _student.email || 'Student' %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Nav Links -->
+  <nav class="px-3 py-4 space-y-1">
+    <% navItems.forEach(item => { %>
+      <a href="<%= item.href %>"
+         onclick="closeStudentDrawer()"
+         class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition
+                <%= _activePage === item.label ? 'bg-brand-navy text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' %>">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><%- item.icon %></svg>
+        <%= item.label %>
+      </a>
+    <% }) %>
+
+    <div class="border-t border-slate-100 mx-1 my-2"></div>
+
+    <% drawerExtras.forEach(item => { %>
+      <a href="<%= item.href %>"
+         onclick="closeStudentDrawer()"
+         class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition
+                <%= _activePage === item.label ? 'bg-brand-navy text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' %>">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><%- item.icon %></svg>
+        <%= item.label %>
+      </a>
+    <% }) %>
+  </nav>
+
+  <!-- Logout in drawer -->
+  <div class="px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] mt-auto border-t border-slate-100 pt-3">
+    <a href="/logout"
+       class="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold text-red-600 hover:bg-red-50 transition w-full">
+      <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════
+     MOBILE BOTTOM NAVIGATION BAR
+     ═══════════════════════════════════════════════════════ -->
+<nav class="bottom-nav lg:hidden" id="bottomNav" aria-label="Bottom navigation">
+  <% navItems.forEach(item => { %>
+    <a href="<%= item.href %>"
+       class="bottom-nav-item <%= _activePage === item.label ? 'active' : '' %>"
+       aria-label="<%= item.label %>"
+       aria-current="<%= _activePage === item.label ? 'page' : 'false' %>">
+      <svg viewBox="0 0 24 24" fill="none"
+           stroke="currentColor"
+           stroke-width="<%= _activePage === item.label ? '2.2' : '1.8' %>"
+           stroke-linecap="round" stroke-linejoin="round">
+        <%- item.icon %>
+      </svg>
+      <span><%= item.label === 'Announcements' ? 'Announce' : item.label %></span>
+    </a>
+  <% }) %>
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Student Drawer ─────────────────────────────────────
+    const drawer  = document.getElementById('studentDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+    const hamburger = document.getElementById('drawerHamburger');
+
+    function openStudentDrawer() {
+      if (!drawer) return;
+      drawer.classList.add('open');
+      overlay && overlay.classList.add('open');
+      document.body.classList.add('drawer-open');
+      drawer.setAttribute('aria-hidden', 'false');
+      hamburger && hamburger.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeStudentDrawer() {
+      if (!drawer) return;
+      drawer.classList.remove('open');
+      overlay && overlay.classList.remove('open');
+      document.body.classList.remove('drawer-open');
+      drawer.setAttribute('aria-hidden', 'true');
+      hamburger && hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    // Expose globally for onclick= attributes
+    window.openStudentDrawer  = openStudentDrawer;
+    window.closeStudentDrawer = closeStudentDrawer;
+
+    // Close on overlay click
+    overlay && overlay.addEventListener('click', closeStudentDrawer);
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeStudentDrawer();
+    });
+
+    // ── Desktop Avatar Dropdown ─────────────────────────────
+    window.toggleDesktopAvatarMenu = function () {
+      const dd = document.getElementById('desktopAvatarDropdown');
+      if (dd) dd.classList.toggle('hidden');
+    };
+
+    document.addEventListener('click', function (e) {
+      const menu = document.getElementById('desktopAvatarMenu');
+      if (menu && !menu.contains(e.target)) {
+        const dd = document.getElementById('desktopAvatarDropdown');
+        if (dd) dd.classList.add('hidden');
+      }
+    });
+
+    // ── Swipe-left to close drawer ─────────────────────────
+    let touchStartX = 0;
+    if (drawer) {
+      drawer.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      drawer.addEventListener('touchend', function (e) {
+        const dx = touchStartX - e.changedTouches[0].clientX;
+        if (dx > 60) closeStudentDrawer();
+      }, { passive: true });
+    }
+
+  });
+</script>

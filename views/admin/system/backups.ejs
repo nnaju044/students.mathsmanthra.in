@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head><%- include('../../partials/head') %></head>
+<body class="h-full bg-slate-50 text-slate-800">
+<div class="flex h-full min-h-screen">
+  <%- include('../../layouts/sidebar', { activePage: 'System' }) %>
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('../../layouts/header', { pageTitle: 'System Backups', pageSubtitle: backups.length + ' backup(s) available' }) %>
+    <main class="flex-1 px-6 sm:px-8 py-8 overflow-y-auto">
+
+      <% if (success) { %>
+        <div class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-5 py-3 text-sm font-medium">
+          <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <%= success %>
+        </div>
+      <% } %>
+      <% if (error) { %>
+        <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-xl px-5 py-3 text-sm font-medium">
+          <svg class="w-4 h-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <%= error %>
+        </div>
+      <% } %>
+
+      <!-- Info Card -->
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-6 text-white">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-lg font-bold mb-1">Database Backup System</h2>
+            <p class="text-indigo-100 text-sm max-w-lg">Backups export all collections (Students, Courses, Batches, Lessons, Homework, Payments, Announcements, Attendance) to a JSON file stored on the server.</p>
+          </div>
+          <form method="POST" action="/admin/system/backups/create">
+            <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 text-sm font-bold rounded-xl hover:bg-indigo-50 transition shadow-sm">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Create Backup Now
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Backups List -->
+      <% if (backups.length === 0) { %>
+        <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+          <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+          No backups yet. Create your first backup above.
+        </div>
+      <% } else { %>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-4">Filename</th>
+                  <th class="px-6 py-4">Size</th>
+                  <th class="px-6 py-4">Created At</th>
+                  <th class="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <% backups.forEach(b => { %>
+                <tr class="hover:bg-slate-50/60 transition">
+                  <td class="px-6 py-4 font-mono text-xs text-slate-700"><%= b.filename %></td>
+                  <td class="px-6 py-4 text-slate-600"><%= b.sizeFormatted %></td>
+                  <td class="px-6 py-4 text-slate-500"><%= b.createdAtFormatted %></td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a href="/admin/system/backups/download/<%= b.filename %>"
+                         class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download
+                      </a>
+                      <form method="POST" action="/admin/system/backups/delete/<%= b.filename %>" onsubmit="return confirm('Delete this backup? This cannot be undone.');">
+                        <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition">
+                          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/></svg>
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+
+    </main>
+    <%- include('../../layouts/footer') %>
+  </div>
+</div>
+</body>
+</html>
